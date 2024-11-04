@@ -1,0 +1,15 @@
+asyncore
+pyinotify
+pymodbus
+yaml
+multiprocessing
+logging
+configparser
+subprocess
+shlex
+datetime
+http.server
+socket
+pickle
+struct
+twisted
