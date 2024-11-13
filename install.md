@@ -20,6 +20,11 @@ Ce guide d'installation explique comment configurer l'environnement et installer
     ```bash
     pip install pyyaml pyinotify pymodbus configparser
     ```
+3. Installez les dépendances systèmes nécessaires :
+   ```bash
+   sudo apt update && sudo apt install net-tools
+   ```
+
 
 ### Configuration
 

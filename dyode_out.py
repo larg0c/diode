@@ -28,7 +28,7 @@ def launch_agents(module, properties):
 
 if __name__ == '__main__':
     with open('config.yaml', 'r') as config_file:
-        config = yaml.load(config_file)
+        config = yaml.load(config_file, Loader=yaml.FullLoader)
 
     # Log infos about the configuration file
     log.info('Loading config file')
