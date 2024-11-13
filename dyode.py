@@ -8,7 +8,7 @@ import random
 import shutil
 import threading
 import configparser
-from configparser import Safeconfigparser
+from configparser import ConfigParser
 import sys, time, subprocess, os
 import logging
 import hashlib
@@ -80,7 +80,7 @@ def wait_for_file(params):
         log.error('Invalid checksum for file ' + f)
         os.remove(f)
         log.error('Calculating next file hash...')
-        continue
+        pass
     else:
         log.info('Hashes match !')
     shutil.move(temp_file, params['out'] + '/' + filename)

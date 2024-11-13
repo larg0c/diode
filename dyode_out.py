@@ -5,7 +5,6 @@ import os
 import sys
 import yaml
 import pyinotify
-import modbus
 import screen
 import logging
 import shlex
@@ -26,9 +25,6 @@ def launch_agents(module, properties):
     if properties['type'] == 'folder':
         log.debug('Instanciating a file transfer module :: %s' % module)
         dyode.file_reception_loop(properties)
-    elif properties['type'] == 'modbus':
-        log.debug('Modbus agent : %s' % module)
-        modbus.modbus_master(module, properties)
     elif properties['type'] == 'screen':
         log.debug('Screen sharing : %s' % module)
         screen_process = multiprocessing.Process(name='http_server', target=screen.http_server, args=(module, properties))

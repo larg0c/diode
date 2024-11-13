@@ -10,7 +10,6 @@ import subprocess
 import multiprocessing
 import shlex
 import asyncore
-import modbus
 import os
 import screen
 
@@ -48,9 +47,6 @@ def launch_agents(module, properties):
     if properties['type'] == 'folder':
         log.debug('Instanciating a file transfer module :: %s' % module)
         watch_folder(properties)
-    elif properties['type'] == 'modbus':
-        log.debug('Modbus agent : %s' % module)
-        modbus.modbus_loop(module, properties)
     elif properties['type'] == 'screen':
         log.debug('Screen sharing agent : %s' % module)
         screen.watch_folder(module, properties)
