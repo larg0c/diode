@@ -42,8 +42,6 @@ def parse_manifest(file):
 def file_reception_loop(params):
     while(1):
         wait_for_file(params)
-
-
         time.sleep(10)
 
 # Launch UDPCast to receive a file
@@ -76,17 +74,17 @@ def wait_for_file(params):
         temp_file = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(12))
         receive_file(temp_file, params['port'])
         log.info('File ' + f + ' received')
-	log.debug(datetime.datetime.now())
-	hash_file(temp_file)
-        if hash_file(temp_file) != files[f]:
-            log.error('Invalid checksum for file ' + f)
-            os.remove(f)
-            log.error('Calculating next file hash...')
-            continue
-        else:
-            log.info('Hashes match !')
-	    shutil.move(temp_file, params['out'] + '/' + filename)
-	    log.info('File ' + filename + ' available at ' + params['out'])
+    log.debug(datetime.datetime.now())
+    hash_file(temp_file)
+    if hash_file(temp_file) != files[f]:
+        log.error('Invalid checksum for file ' + f)
+        os.remove(f)
+        log.error('Calculating next file hash...')
+        continue
+    else:
+        log.info('Hashes match !')
+    shutil.move(temp_file, params['out'] + '/' + filename)
+    log.info('File ' + filename + ' available at ' + params['out'])
     os.remove(manifest_filename)
 
 
@@ -113,7 +111,6 @@ def list_all_files(dir):
             files.append(os.path.join(root, directory))
         for filename in filenames:
             files.append(os.path.join(root,filename))
-
     return files
 
 # TODO : Adapt to YAML-parsed params
@@ -176,5 +173,4 @@ def hash_file(file):
         while len(buf) > 0:
             hasher.update(buf)
             buf = afile.read(BLOCKSIZE)
-
     return hasher.hexdigest()
