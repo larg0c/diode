@@ -15,7 +15,7 @@ dyode_out:
 modules:
   file_transfer:
     type: "folder"
-    in: "/path/to/input_folder"  # Répertoire d'entrée pour les fichiers à transférer
-    out: "/path/to/output_folder"  # Répertoire de destination des fichiers
+    in: "/home/analyste/in"  # Répertoire d'entrée pour les fichiers à transférer
+    out: "/home/analyste/out"  # Répertoire de destination des fichiers
     port: 9000  # Port UDP pour le transfert de fichiers
     bitrate: 10  # Débit maximal en Mbps pour le transfert
