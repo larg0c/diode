@@ -11,7 +11,6 @@ import multiprocessing
 import shlex
 import asyncore
 import os
-import screen
 
 # Max bitrate, empirical, should be a bit less than 100 but isn't
 MAX_BITRATE = 8
@@ -47,9 +46,6 @@ def launch_agents(module, properties):
     if properties['type'] == 'folder':
         log.debug('Instanciating a file transfer module :: %s' % module)
         watch_folder(properties)
-    elif properties['type'] == 'screen':
-        log.debug('Screen sharing agent : %s' % module)
-        screen.watch_folder(module, properties)
 
 
 if __name__ == '__main__':
@@ -70,7 +66,6 @@ if __name__ == '__main__':
 
     # Number of modules (needed to calculate bitrate)
     # Only works for file transfer using udpcast
-    # TODO : Screen sharing needs more bandwidth
     # TODO : Needs to be updated for socket transfer
     modules_nb = len((config['modules']))
     log.debug('Number of modules : %s' % len(config['modules']))
