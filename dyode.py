@@ -9,7 +9,7 @@ import shutil
 import threading
 import configparser
 from configparser import Safeconfigparser
-import sys time, subprocess, os
+import sys, time, subprocess, os
 import logging
 import hashlib
 from math import floor
@@ -30,7 +30,7 @@ log.setLevel(logging.DEBUG)
 ######################## Reception specific funcitons ##########################
 
 def parse_manifest(file):
-    parser = SafeConfigParser()
+    parser = Safeconfigparser()
     parser.read(file)
     files = {}
     for item, value in parser.items('Files'):
@@ -118,7 +118,7 @@ def list_all_files(dir):
 
 # TODO : Adapt to YAML-parsed params
 def parse_config():
-    parser = SafeConfigParser()
+    parser = Safeconfigparser()
     parser.read('sample.folder')
     params = {}
     for item, value in parser.items('folder'):
@@ -127,7 +127,7 @@ def parse_config():
     return params
 
 def write_manifest(files, manifest_filename):
-    config = ConfigParser.RawConfigParser()
+    config = configparser.Rawconfigparser()
     config.add_section('Files')
     log.debug('Files...')
     log.debug(files)

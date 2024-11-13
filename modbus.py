@@ -102,7 +102,7 @@ def modbus_send(data, properties):
     	s.sendto(msg,addr)
     	time.sleep(0.0002)
     	i+= 1
-    s.sendto('', addr)
+    s.sendto(b'', addr)
     s.close()
 
 def modbus_loop(module, properties):

@@ -5,7 +5,7 @@ import os
 import sys
 import yaml
 import pyinotify
-import pymodbus
+import modbus
 import screen
 import logging
 import shlex
@@ -51,8 +51,8 @@ if __name__ == '__main__':
 
     # Iterate on modules
     modules = config.get('modules')
-    for module, properties in modules.iteritems():
-        #print module
+    for module, properties in modules.items():
+        #print(module)
         log.debug('Parsing "' + module + '"')
         log.debug('Trying to launch a new process for module "' + str(module) +'"')
         p = multiprocessing.Process(name=str(module), target=launch_agents, args=(module, properties))
