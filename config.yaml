@@ -4,11 +4,11 @@ config_date: "2024-11-13"
 
 # Paramètres pour la communication entre les ordinateurs
 dyode_in:
-  ip: "10.0.1.1"  # IP de l'ordinateur d'entrée
+  ip: "192.168.1.182"  # IP de l'ordinateur d'entrée
   mac: "b8:27:eb:b1:ff:ab"
 
 dyode_out:
-  ip: "10.0.1.2"  # IP de l'ordinateur de sortie
+  ip: "192.168.1.86"  # IP de l'ordinateur de sortie
   mac: "BC:24:11:26:2C:D3"
 
 # Modules de transfert de fichiers via UDP
