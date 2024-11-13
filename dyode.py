@@ -26,11 +26,10 @@ log.setLevel(logging.DEBUG)
 
 
 
-
 ######################## Reception specific funcitons ##########################
 
 def parse_manifest(file):
-    parser = Safeconfigparser()
+    parser = ConfigParser()
     parser.read(file)
     files = {}
     for item, value in parser.items('Files'):
@@ -136,19 +135,22 @@ def write_manifest(files, manifest_filename):
         config.write(configfile)
 
 def file_copy(params):
-    log.debug('Local copy starting ...')
+    log.debug('Début de la copie locale...')
 
-    files =  list_all_files(params[1]['in'])
-    log.debug('List of files : ' + str(files))
+    files = list_all_files(params[1]['in'])
+    log.debug('Liste des fichiers : ' + str(files))
     if len(files) == 0:
-        log.debug('No file detected')
+        log.debug('Aucun fichier détecté')
         return 0
+    
     manifest_data = {}
-
     for f in files:
         manifest_data[f] = hash_file(f)
-    log.debug('Writing manifest file')
-    # Use a dedicated name for each process to prevent race conditions
+    
+    # Ajoutez le log ici pour voir le contenu de manifest_data
+    log.debug("Contenu du fichier manifeste : " + str(manifest_data))
+
+    log.debug('Écriture du fichier manifeste')
     manifest_filename = 'manifest_' + str(params[0]) + '.cfg'
     write_manifest(manifest_data, manifest_filename)
     log.info('Sending manifest file : ' + manifest_filename)

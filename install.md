@@ -22,7 +22,8 @@ Ce guide d'installation explique comment configurer l'environnement et installer
     ```
 3. Installez les dépendances systèmes nécessaires :
    ```bash
-   sudo apt update && sudo apt install net-tools
+   sudo apt update && sudo apt install net-tools && apt install ufw
+   sudo ufw allow 9000/udp
    ```
 
 
