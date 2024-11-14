@@ -1,83 +1,49 @@
-# -*- coding: utf-8 -*-
-import dyode
-import time
-import sys
-import yaml
-import pyinotify
-import logging
-from math import floor
-import subprocess
-import multiprocessing
-import shlex
-import asyncore
 import os
+import hashlib
+import logging
+import subprocess
+import shlex
+from configparser import ConfigParser
 
-# Max bitrate, empirical, should be a bit less than 100 but isn't
-MAX_BITRATE = 8
-
-# Logging
+# Configuration du logging
 logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.DEBUG)
 
-class EventHandler(pyinotify.ProcessEvent):
-    def process_IN_CLOSE_WRITE(self, event):
-        log.info('New file detected :: %s' % event.pathname)
-        # If a new file is detected, launch the copy
-        dyode.file_copy(multiprocessing.current_process()._args)
+def hash_file(file):
+    BLOCKSIZE = 65536
+    hasher = hashlib.sha256()
+    with open(file, 'rb') as afile:
+        buf = afile.read(BLOCKSIZE)
+        while len(buf) > 0:
+            hasher.update(buf)
+            buf = afile.read(BLOCKSIZE)
+    return hasher.hexdigest()
 
-# When a new file finished copying in the input folder, send it
-def watch_folder(properties):
-    log.debug('Function "folder" launched with params %s: ' % properties)
+def write_manifest(files, manifest_filename):
+    config = ConfigParser()
+    config.add_section('Files')
+    for f in files:
+        config.set('Files', f, files[f])
 
-    # inotify kernel watchdog stuff
-    wm = pyinotify.WatchManager()
-    mask = pyinotify.IN_CLOSE_WRITE
-    notifier = pyinotify.AsyncNotifier(wm, EventHandler())
-    wdd = wm.add_watch(properties['in'], mask, rec = True)
-    log.debug('watching :: %s' % properties['in'])
-    asyncore.loop()
+    with open(manifest_filename, 'w') as configfile:
+        config.write(configfile)
 
+def parse_manifest(file):
+    parser = ConfigParser()
+    parser.read(file)
+    if 'Files' not in parser.sections():
+        log.error("La section [Files] est manquante dans le fichier manifeste.")
+        return {}
+    
+    return {item: value for item, value in parser.items('Files')}
 
-def launch_agents(module, properties):
-    log.debug(module)
-    properties['bitrate'] = bitrate
-    log.debug(properties)
-    if properties['type'] == 'folder':
-        log.debug('Instanciating a file transfer module :: %s' % module)
-        watch_folder(properties)
+def send_file(file, port_base, max_bitrate, ip):
+    command = f'udp-sender --async --fec 8x16/64 --max-bitrate {max_bitrate}m --mcast-rdv-addr {ip} --portbase {port_base} --autostart 1 --interface eth0 -f \'{file}\''
+    log.debug(command)
+    subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, shell=False).communicate()
 
-
-if __name__ == '__main__':
-    with open('config.yaml', 'r') as config_file:
-        config = yaml.load(config_file, Loader=yaml.FullLoader)
-
-    # Log infos about the configuration file
-    log.info('Loading config file')
-    log.info('Configuration name : %s' % config['config_name'])
-    log.info('Configuration version : %s' % config['config_version'])
-    log.info('Configuration date : %s' % config['config_date'])
-
-    # Static ARP
-    log.info('Dyode input ip : %s (%s)' % (config['dyode_in']['ip'], config['dyode_in']['mac']))
-    log.info('Dyode output ip : %s (%s)' % (config['dyode_out']['ip'], config['dyode_out']['mac']))
-    p = subprocess.Popen(shlex.split('arp -s ' + config['dyode_out']['ip'] + ' ' + config['dyode_out']['mac']), shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output, err = p.communicate()
-
-    # Number of modules (needed to calculate bitrate)
-    # Only works for file transfer using udpcast
-    # TODO : Needs to be updated for socket transfer
-    modules_nb = len((config['modules']))
-    log.debug('Number of modules : %s' % len(config['modules']))
-    bitrate = floor(MAX_BITRATE / modules_nb)
-    log.debug('Max bitrate per module : %s mbps' % bitrate)
-
-    # Iterate on modules
-    modules = config.get('modules')
-    for module, properties in modules.items():
-        log.debug('Parsing %s' % module)
-        log.debug('Trying to launch a new process for module %s' % module)
-        p = multiprocessing.Process(name=str(module), target=launch_agents, args=(module, properties))
-        p.start()
-
-    # TODO : Check if all modules are still alive and restart the ones that are not
+def receive_file(filepath, portbase, ip):
+    command = f'udp-receiver --nosync --mcast-rdv-addr {ip} --interface eth1 --portbase {portbase} -f \'{filepath}\''
+    log.debug(command)
+    subprocess.Popen(shlex.split(command), shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()

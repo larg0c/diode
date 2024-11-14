@@ -1,53 +1,52 @@
-# -*- coding: utf-8 -*-
-import dyode
-import time
 import os
-import sys
-import yaml
-import pyinotify
+import time
+import dyode
 import logging
-import shlex
-from math import floor
-import multiprocessing
-import asyncore
+from configparser import ConfigParser
 
-# Max bitrate, empirical, should be a bit less than 100 but isn't
-MAX_BITRATE = 20
-
-# Logging
 logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.DEBUG)
 
+def list_all_files(directory):
+    files = []
+    for root, _, filenames in os.walk(directory):
+        for filename in filenames:
+            files.append(os.path.join(root, filename))
+    return files
 
-def launch_agents(module, properties):
-    if properties['type'] == 'folder':
-        properties['ip'] = config['dyode_in']['ip']  # Ajout de l'IP dans les propriétés du module
-        log.debug('Instanciating a file transfer module :: %s' % module)
-        dyode.file_reception_loop(properties)
+def file_copy(params):
+    files = list_all_files(params['in'])
+    if not files:
+        log.debug("Aucun fichier détecté pour l'envoi.")
+        return
+    
+    manifest_data = {f: dyode.hash_file(f) for f in files}
+    manifest_filename = 'manifest.cfg'
+    dyode.write_manifest(manifest_data, manifest_filename)
 
+    dyode.send_file(manifest_filename, params['port'], params['bitrate'], params['ip'])
+    os.remove(manifest_filename)
+
+    for f in files:
+        dyode.send_file(f, params['port'], params['bitrate'], params['ip'])
+        os.remove(f)
+
+def watch_folder(params):
+    while True:
+        file_copy(params)
+        time.sleep(10)
 
 if __name__ == '__main__':
     with open('config.yaml', 'r') as config_file:
-        config = yaml.load(config_file, Loader=yaml.FullLoader)
-
-    # Log infos about the configuration file
-    log.info('Loading config file')
-    log.info('Configuration name : ' + config['config_name'])
-    log.info('Configuration version : ' + str(config['config_version']))
-    log.info('Configuration date : ' + str(config['config_date']))
-
-    # Static ARP
-    log.info('Dyode input ip : ' + str(config['dyode_in']['ip']) + ' (' + str(config['dyode_in']['mac']) + ')' )
-    log.info('Dyode output ip : ' + str(config['dyode_out']['ip']) + ' (' + str(config['dyode_out']['mac']) + ')' )
-
-    # Iterate on modules
-    modules = config.get('modules')
-    for module, properties in modules.items():
-        #print(module)
-        log.debug('Parsing "' + module + '"')
-        log.debug('Trying to launch a new process for module "' + str(module) +'"')
-        p = multiprocessing.Process(name=str(module), target=launch_agents, args=(module, properties))
-        p.start()
-
-    # TODO : Check if all modules are still alive and restart the ones that are not
+        config = ConfigParser()
+        config.read_file(config_file)
+    
+    modules = config['modules']['file_transfer']
+    properties = {
+        'in': modules['in'],
+        'port': modules['port'],
+        'bitrate': modules['bitrate'],
+        'ip': config['dyode_in']['ip']
+    }
+    watch_folder(properties)
