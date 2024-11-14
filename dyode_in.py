@@ -16,7 +16,7 @@ with open('config.yaml', 'r') as config_file:
 # Extraire les informations de configuration pour dyode_in
 modules = config['modules']['file_transfer']
 properties = {
-    'out': modules['out'],                   # Dossier pour enregistrer les fichiers reçus
+    'in': modules['in'],                   # Dossier pour enregistrer les fichiers reçus
     'port': modules['port'],                  # Port de transfert
     'ip': config['dyode_out']['ip'],          # IP de dyode_out pour réception
     'interface': config['dyode_in']['interface']  # Interface réseau pour la réception
@@ -32,7 +32,7 @@ def wait_for_file(params):
         return
     
     for f, expected_hash in files.items():
-        temp_file = os.path.join(params['out'], os.path.basename(f))
+        temp_file = os.path.join(params['in'], os.path.basename(f))
         dyode.receive_file(temp_file, params['port'], params['ip'], params['interface'])
 
         if dyode.hash_file(temp_file) != expected_hash:

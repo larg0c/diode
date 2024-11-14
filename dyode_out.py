@@ -17,7 +17,7 @@ with open('config.yaml', 'r') as config_file:
 # Extraire les informations de configuration pour dyode_out
 modules = config['modules']['file_transfer']
 properties = {
-    'in': modules['in'],                      # Dossier surveillé pour envoi
+    'out': modules['out'],                      # Dossier surveillé pour envoi
     'port': modules['port'],                  # Port de transfert
     'bitrate': modules['bitrate'],            # Débit en Mbps
     'ip': config['dyode_in']['ip'],           # IP de dyode_in pour l'envoi
@@ -32,7 +32,7 @@ def list_all_files(directory):
     return files
 
 def file_copy(params):
-    files = list_all_files(params['in'])
+    files = list_all_files(params['out'])
     if not files:
         log.debug("Aucun fichier détecté pour l'envoi.")
         return
