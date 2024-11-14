@@ -49,13 +49,14 @@ def parse_manifest(file):
     return {item: value for item, value in parser.items('Files')}
 
 # Envoi de fichier via UDP
-def send_file(file, port_base, max_bitrate, ip):
-    command = f'udp-sender --async --fec 8x16/64 --max-bitrate {max_bitrate}m --mcast-rdv-addr {ip} --portbase {port_base} --autostart 1 --interface eth0 -f \'{file}\''
+def send_file(file, port_base, max_bitrate, ip, interface):
+    command = f'udp-sender --async --fec 8x16/64 --max-bitrate {max_bitrate}m --mcast-rdv-addr {ip} --portbase {port_base} --autostart 1 --interface {interface} -f \'{file}\''
     log.debug(command)
     subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, shell=False).communicate()
 
 # Réception de fichier via UDP
-def receive_file(filepath, portbase, ip):
-    command = f'udp-receiver --nosync --mcast-rdv-addr {ip} --interface eth1 --portbase {portbase} -f \'{filepath}\''
+def receive_file(filepath, portbase, ip, interface):
+    command = f'udp-receiver --nosync --mcast-rdv-addr {ip} --interface {interface} --portbase {portbase} -f \'{filepath}\''
     log.debug(command)
     subprocess.Popen(shlex.split(command), shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+

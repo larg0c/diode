@@ -1,15 +1,30 @@
 import os
+import yaml
 import dyode
 import logging
 from configparser import ConfigParser
 
+# Configuration du logging
 logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.DEBUG)
 
+# Charger la configuration YAML
+with open('config.yaml', 'r') as config_file:
+    config = yaml.safe_load(config_file)
+
+# Extraire les informations de configuration pour dyode_in
+modules = config['modules']['file_transfer']
+properties = {
+    'out': modules['out'],                   # Dossier pour enregistrer les fichiers reçus
+    'port': modules['port'],                  # Port de transfert
+    'ip': config['dyode_out']['ip'],          # IP de dyode_out pour réception
+    'interface': config['dyode_in']['interface']  # Interface réseau pour la réception
+}
+
 def wait_for_file(params):
     manifest_filename = 'manifest.cfg'
-    dyode.receive_file(manifest_filename, params['port'], params['ip'])
+    dyode.receive_file(manifest_filename, params['port'], params['ip'], params['interface'])
 
     files = dyode.parse_manifest(manifest_filename)
     if not files:
@@ -18,7 +33,7 @@ def wait_for_file(params):
     
     for f, expected_hash in files.items():
         temp_file = os.path.join(params['out'], os.path.basename(f))
-        dyode.receive_file(temp_file, params['port'], params['ip'])
+        dyode.receive_file(temp_file, params['port'], params['ip'], params['interface'])
 
         if dyode.hash_file(temp_file) != expected_hash:
             log.error(f"Checksum invalide pour le fichier {f}.")
@@ -27,16 +42,6 @@ def wait_for_file(params):
             log.info(f"Fichier {temp_file} reçu avec succès.")
 
 if __name__ == '__main__':
-    with open('config.yaml', 'r') as config_file:
-        config = ConfigParser()
-        config.read_file(config_file)
-
-    modules = config['modules']['file_transfer']
-    properties = {
-        'out': modules['out'],
-        'port': modules['port'],
-        'ip': config['dyode_out']['ip']
-    }
-
+    # Boucle d'attente pour les fichiers
     while True:
         wait_for_file(properties)

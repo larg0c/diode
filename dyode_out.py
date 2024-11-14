@@ -1,13 +1,28 @@
 import os
 import time
-import dyode
 import yaml
+import dyode
 import logging
 from configparser import ConfigParser
 
+# Configuration du logging
 logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.DEBUG)
+
+# Charger la configuration YAML
+with open('config.yaml', 'r') as config_file:
+    config = yaml.safe_load(config_file)
+
+# Extraire les informations de configuration pour dyode_out
+modules = config['modules']['file_transfer']
+properties = {
+    'in': modules['in'],                      # Dossier surveillé pour envoi
+    'port': modules['port'],                  # Port de transfert
+    'bitrate': modules['bitrate'],            # Débit en Mbps
+    'ip': config['dyode_in']['ip'],           # IP de dyode_in pour l'envoi
+    'interface': config['dyode_out']['interface']  # Interface réseau pour l'envoi
+}
 
 def list_all_files(directory):
     files = []
@@ -26,11 +41,11 @@ def file_copy(params):
     manifest_filename = 'manifest.cfg'
     dyode.write_manifest(manifest_data, manifest_filename)
 
-    dyode.send_file(manifest_filename, params['port'], params['bitrate'], params['ip'])
+    dyode.send_file(manifest_filename, params['port'], params['bitrate'], params['ip'], params['interface'])
     os.remove(manifest_filename)
 
     for f in files:
-        dyode.send_file(f, params['port'], params['bitrate'], params['ip'])
+        dyode.send_file(f, params['port'], params['bitrate'], params['ip'], params['interface'])
         os.remove(f)
 
 def watch_folder(params):
@@ -39,16 +54,5 @@ def watch_folder(params):
         time.sleep(10)
 
 if __name__ == '__main__':
-    # Charger la configuration depuis le fichier YAML
-    with open('config.yaml', 'r') as config_file:
-        config = yaml.safe_load(config_file)
-    
-    # Extraire les informations nécessaires pour dyode_out
-    modules = config['modules']['file_transfer']
-    properties = {
-        'in': modules['in'],                  # Dossier de surveillance
-        'port': modules['port'],              # Port de transfert
-        'bitrate': modules['bitrate'],        # Débit
-        'ip': config['dyode_in']['ip']        # IP de dyode_in pour l'envoi
-    }
+    # Lancement de la surveillance du dossier et envoi des fichiers
     watch_folder(properties)
