@@ -1,13 +1,10 @@
 import os
-import sys
 import time
 import yaml
 import dyode
+import signal
 import logging
 import netifaces
-from configparser import ConfigParser
-from threading import Timer
-import signal
 
 # Configuration du logging
 logging.basicConfig()

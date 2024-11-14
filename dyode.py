@@ -1,9 +1,8 @@
-import os
+import yaml
+import shlex
 import hashlib
 import logging
 import subprocess
-import shlex
-import yaml
 from configparser import ConfigParser
 
 # Configuration du logging
