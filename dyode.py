@@ -59,4 +59,3 @@ def receive_file(filepath, portbase, ip, interface):
     command = f'udp-receiver --nosync --mcast-rdv-addr {ip} --interface {interface} --portbase {portbase} -f \'{filepath}\''
     log.debug(command)
     subprocess.Popen(shlex.split(command), shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-

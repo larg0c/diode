@@ -6,7 +6,7 @@ config_date: "2024-11-13"
 dyode_in:
   ip: "192.168.1.182"  # IP de l'ordinateur d'entrée
   mac: "b8:27:eb:b1:ff:ab"
-  interface: "eth1"
+  interface: "eth0"
 
 dyode_out:
   ip: "192.168.1.86"  # IP de l'ordinateur de sortie
