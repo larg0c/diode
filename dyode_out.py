@@ -83,8 +83,6 @@ def confirm_or_edit_properties(properties):
     
     choice = input_with_timeout("Est-ce correct ? (y/n) : ").strip().lower()
     if choice == 'y' or choice == '':
-        print("Démarrage dans 10 secondes...")
-        time.sleep(10)
         return properties
     elif choice == 'n':
         # Permettre à l'utilisateur de modifier chaque champ
@@ -94,7 +92,7 @@ def confirm_or_edit_properties(properties):
         # Re-demander l'interface réseau
         available_interfaces = get_available_interfaces()
         properties['interface'] = choose_interface(available_interfaces)
-        return properties
+        return confirm_or_edit_properties(properties)
     else:
         print("Choix non valide. Veuillez réessayer.")
         return confirm_or_edit_properties(properties)

@@ -2,6 +2,7 @@ import os
 import time
 import yaml
 import dyode
+import signal
 import logging
 import netifaces
 
@@ -9,6 +10,23 @@ import netifaces
 logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.DEBUG)
+
+# Fonction de gestion de la temporisation
+def timeout_handler(signum, frame):
+    raise TimeoutError
+
+# Fonction pour une saisie avec temporisation
+def input_with_timeout(prompt, timeout=10):
+    # Associer le signal d'alarme à notre gestionnaire
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(timeout)  # Déclencher l'alarme après le temps imparti
+    try:
+        return input(prompt)
+    except TimeoutError:
+        print("\nTemps écoulé, confirmation automatique.")
+        return ''  # Retourne une chaîne vide pour confirmer automatiquement
+    finally:
+        signal.alarm(0)  # Désactiver l'alarme
 
 # Fonction pour détecter les interfaces réseau disponibles
 def get_available_interfaces():
@@ -50,14 +68,6 @@ def load_config():
     
     return properties
 
-# Fonction pour une saisie avec temporisation
-def input_with_timeout(prompt, timeout=10):
-    timer = Timer(timeout, lambda: sys.stdin.write('\n'))
-    timer.start()
-    try:
-        return input(prompt)
-    finally:
-        timer.cancel()
 
 # Fonction pour vérifier la configuration avec l'utilisateur
 def confirm_or_edit_properties(properties):
@@ -70,8 +80,6 @@ def confirm_or_edit_properties(properties):
     # Utilisation de input_with_timeout pour que le script continue après 10 secondes avec "y" par défaut
     choice = input_with_timeout("Est-ce correct ? (y/n) : ").strip().lower()
     if choice == 'y' or choice == '':
-        print("Démarrage dans 10 secondes...")
-        time.sleep(10)
         return properties
     elif choice == 'n':
         # Permettre à l'utilisateur de modifier chaque champ
@@ -81,7 +89,7 @@ def confirm_or_edit_properties(properties):
         # Re-demander l'interface réseau
         available_interfaces = get_available_interfaces()
         properties['interface'] = choose_interface(available_interfaces)
-        return properties
+        return confirm_or_edit_properties(properties)
     else:
         print("Choix non valide. Veuillez réessayer.")
         return confirm_or_edit_properties(properties)
