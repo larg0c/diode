@@ -37,7 +37,7 @@ def wait_for_file(params):
         return
     
     for f, expected_hash in files.items():
-        temp_file = os.path.join(params['out'], os.path.basename(f))
+        temp_file = os.path.join(params['in'], os.path.basename(f))
         dyode.receive_file(temp_file, params['port'], params['ip'], params['interface'])
 
         if dyode.hash_file(temp_file) != expected_hash:
