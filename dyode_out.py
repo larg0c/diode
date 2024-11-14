@@ -42,7 +42,7 @@ def choose_interface(interfaces):
     print("Interfaces réseau disponibles :")
     for i, iface in enumerate(interfaces, 1):
         print(f"{i}. {iface}")
-    choice = int(input(f"Choisissez une interface (numéro) [{properties['interfaces']}]: ")) - 1
+    choice = int(input(f"Choisissez une interface (numéro) : ")) - 1
     return interfaces[choice]
 
 # Charger la configuration YAML et vérifier les paramètres
