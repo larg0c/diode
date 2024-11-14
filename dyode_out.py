@@ -22,6 +22,7 @@ log.setLevel(logging.DEBUG)
 
 def launch_agents(module, properties):
     if properties['type'] == 'folder':
+        properties['ip'] = config['dyode_in']['ip']  # Ajout de l'IP dans les propriétés du module
         log.debug('Instanciating a file transfer module :: %s' % module)
         dyode.file_reception_loop(properties)
 
