@@ -40,6 +40,10 @@ def file_copy(params):
     manifest_data = {f: dyode.hash_file(f) for f in files}
     manifest_filename = 'manifest.cfg'
     dyode.write_manifest(manifest_data, manifest_filename)
+    
+    # Ajouter un log pour vérifier le contenu du fichier manifeste
+    with open(manifest_filename, 'r') as manifest_file:
+        log.debug(f"Contenu du fichier manifeste généré :\n{manifest_file.read()}")
 
     dyode.send_file(manifest_filename, params['port'], params['bitrate'], params['ip'], params['interface'])
     os.remove(manifest_filename)
@@ -47,6 +51,7 @@ def file_copy(params):
     for f in files:
         dyode.send_file(f, params['port'], params['bitrate'], params['ip'], params['interface'])
         os.remove(f)
+
 
 def watch_folder(params):
     while True:

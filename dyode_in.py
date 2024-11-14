@@ -26,13 +26,18 @@ def wait_for_file(params):
     manifest_filename = 'manifest.cfg'
     dyode.receive_file(manifest_filename, params['port'], params['ip'], params['interface'])
 
+    # Vérifier le contenu du fichier manifeste après réception
+    if os.path.exists(manifest_filename):
+        with open(manifest_filename, 'r') as manifest_file:
+            log.debug(f"Contenu du fichier manifeste reçu :\n{manifest_file.read()}")
+
     files = dyode.parse_manifest(manifest_filename)
     if not files:
         log.error("Aucun fichier reçu.")
         return
     
     for f, expected_hash in files.items():
-        temp_file = os.path.join(params['in'], os.path.basename(f))
+        temp_file = os.path.join(params['out'], os.path.basename(f))
         dyode.receive_file(temp_file, params['port'], params['ip'], params['interface'])
 
         if dyode.hash_file(temp_file) != expected_hash:
