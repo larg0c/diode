@@ -94,7 +94,7 @@ def confirm_or_edit_properties(properties):
     print(f"Dossier de réception : {properties['folder']}")
     
     # Utilisation de input_with_timeout pour que le script continue après 10 secondes avec "y" par défaut
-    choice = input_with_timeout("Est-ce correct ? (y/n) : ").strip().lower()
+    choice = input_with_timeout("Est-ce correct ? (y[10s]/n) : ").strip().lower()
     if choice == 'y' or choice == '':
         return properties
     elif choice == 'n':
@@ -106,6 +106,7 @@ def confirm_or_edit_properties(properties):
         # Re-demander l'interface réseau
         available_interfaces = get_available_interfaces()
         properties['interface'] = choose_interface(available_interfaces) or properties['interface']
+        print("\n⚠️ Avertissement :\nSi vous avez appliquez des changements, ils ne seront valables que pour cette session.\nAssurez vous de reporter la configuration dans votre config.yaml si vous la souhaitez persistante.\n")
         return confirm_or_edit_properties(properties)
     else:
         print("Choix non valide. Veuillez réessayer.")

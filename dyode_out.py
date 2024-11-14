@@ -102,10 +102,12 @@ def confirm_or_edit_properties(properties):
         properties['ip'] = input(f"Entrez l'IP du destinataire [{properties['ip']}]: ").strip() or properties['ip']
         properties['port'] = int(input(f"Entrez le port [{properties['port']}]: ").strip() or properties['port'])
         properties['folder'] = input(f"Entrez le chemin du dossier [{properties['folder']}]: ").strip() or properties['folder']
+        properties['bitrate'] = input(f"Entrez le débit (Mbps) [{properties['bitrate']}]: ").strip() or properties['bitrate']
         
         # Re-demander l'interface réseau
         available_interfaces = get_available_interfaces()
         properties['interface'] = choose_interface(available_interfaces)
+        print("\n⚠️ Avertissement : \nSi vous avez appliquez des changements, ils ne seront valables que pour cette session.\nAssurez vous de reporter la configuration dans votre config.yaml si vous la souhaitez persistante.\n")
         return confirm_or_edit_properties(properties)
     else:
         print("Choix non valide. Veuillez réessayer.")
