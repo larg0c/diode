@@ -3,6 +3,7 @@ import hashlib
 import logging
 import subprocess
 import shlex
+import yaml
 from configparser import ConfigParser
 
 # Configuration du logging
@@ -10,6 +11,13 @@ logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.DEBUG)
 
+# Charger la configuration YAML (exemple d'utilisation de yaml pour config.yaml)
+def load_yaml_config(file_path):
+    with open(file_path, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
+
+# Fonction de hachage des fichiers
 def hash_file(file):
     BLOCKSIZE = 65536
     hasher = hashlib.sha256()
@@ -20,6 +28,7 @@ def hash_file(file):
             buf = afile.read(BLOCKSIZE)
     return hasher.hexdigest()
 
+# Écriture du fichier manifeste au format .cfg (en utilisant ConfigParser pour un fichier INI)
 def write_manifest(files, manifest_filename):
     config = ConfigParser()
     config.add_section('Files')
@@ -29,6 +38,7 @@ def write_manifest(files, manifest_filename):
     with open(manifest_filename, 'w') as configfile:
         config.write(configfile)
 
+# Lecture du fichier manifeste (format .cfg)
 def parse_manifest(file):
     parser = ConfigParser()
     parser.read(file)
@@ -38,11 +48,13 @@ def parse_manifest(file):
     
     return {item: value for item, value in parser.items('Files')}
 
+# Envoi de fichier via UDP
 def send_file(file, port_base, max_bitrate, ip):
     command = f'udp-sender --async --fec 8x16/64 --max-bitrate {max_bitrate}m --mcast-rdv-addr {ip} --portbase {port_base} --autostart 1 --interface eth0 -f \'{file}\''
     log.debug(command)
     subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, shell=False).communicate()
 
+# Réception de fichier via UDP
 def receive_file(filepath, portbase, ip):
     command = f'udp-receiver --nosync --mcast-rdv-addr {ip} --interface eth1 --portbase {portbase} -f \'{filepath}\''
     log.debug(command)

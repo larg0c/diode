@@ -1,6 +1,7 @@
 import os
 import time
 import dyode
+import yaml
 import logging
 from configparser import ConfigParser
 
@@ -38,15 +39,16 @@ def watch_folder(params):
         time.sleep(10)
 
 if __name__ == '__main__':
+    # Charger la configuration depuis le fichier YAML
     with open('config.yaml', 'r') as config_file:
-        config = ConfigParser()
-        config.read_file(config_file)
+        config = yaml.safe_load(config_file)
     
+    # Extraire les informations nécessaires pour dyode_out
     modules = config['modules']['file_transfer']
     properties = {
-        'in': modules['in'],
-        'port': modules['port'],
-        'bitrate': modules['bitrate'],
-        'ip': config['dyode_in']['ip']
+        'in': modules['in'],                  # Dossier de surveillance
+        'port': modules['port'],              # Port de transfert
+        'bitrate': modules['bitrate'],        # Débit
+        'ip': config['dyode_in']['ip']        # IP de dyode_in pour l'envoi
     }
     watch_folder(properties)
