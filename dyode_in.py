@@ -39,8 +39,16 @@ def choose_interface(interfaces):
     print("Interfaces réseau disponibles :")
     for i, iface in enumerate(interfaces, 1):
         print(f"{i}. {iface}")
-    choice = int(input("Choisissez une interface (numéro) : ")) - 1
-    return interfaces[choice]
+    # Continue to prompt until a valid selection is made
+    while True:
+        try:
+            choice = int(input("Choisissez une interface (numéro) : ").strip())
+            if 1 <= choice <= len(interfaces):
+                return interfaces[choice - 1]
+            else:
+                print("Numéro invalide. Veuillez entrer un numéro valide.")
+        except ValueError:
+            print("Entrée invalide. Veuillez entrer un numéro valide.")
 
 # Charger la configuration YAML et vérifier les paramètres
 def load_config():

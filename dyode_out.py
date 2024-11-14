@@ -52,7 +52,6 @@ def choose_interface(interfaces):
                 print("Numéro invalide. Veuillez entrer un numéro valide.")
         except ValueError:
             print("Entrée invalide. Veuillez entrer un numéro valide.")
-            choose_interface(available_interfaces)
 
 # Charger la configuration YAML et vérifier les paramètres
 def load_config():
