@@ -1,15 +1,35 @@
 import os
+import sys
 import time
 import yaml
 import dyode
 import logging
 import netifaces
 from configparser import ConfigParser
+from threading import Timer
+import signal
 
 # Configuration du logging
 logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.DEBUG)
+
+# Fonction de gestion de la temporisation
+def timeout_handler(signum, frame):
+    raise TimeoutError
+
+# Fonction pour une saisie avec temporisation
+def input_with_timeout(prompt, timeout=10):
+    # Associer le signal d'alarme à notre gestionnaire
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(timeout)  # Déclencher l'alarme après le temps imparti
+    try:
+        return input(prompt)
+    except TimeoutError:
+        print("\nTemps écoulé, confirmation automatique.")
+        return ''  # Retourne une chaîne vide pour confirmer automatiquement
+    finally:
+        signal.alarm(0)  # Désactiver l'alarme
 
 # Fonction pour détecter les interfaces réseau disponibles
 def get_available_interfaces():
@@ -51,15 +71,6 @@ def load_config():
         properties['interface'] = config['dyode_out']['interface']
     
     return properties
-
-# Fonction pour une saisie avec temporisation
-def input_with_timeout(prompt, timeout=10):
-    timer = Timer(timeout, lambda: sys.stdin.write('\n'))
-    timer.start()
-    try:
-        return input(prompt)
-    finally:
-        timer.cancel()
 
 # Fonction pour vérifier la configuration avec l'utilisateur
 def confirm_or_edit_properties(properties):
