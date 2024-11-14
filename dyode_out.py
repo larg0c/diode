@@ -3,12 +3,27 @@ import time
 import yaml
 import dyode
 import logging
+import netifaces
 from configparser import ConfigParser
 
 # Configuration du logging
 logging.basicConfig()
 log = logging.getLogger()
 log.setLevel(logging.DEBUG)
+
+# Fonction pour détecter les interfaces réseau disponibles
+def get_available_interfaces():
+    interfaces = netifaces.interfaces()
+    available_interfaces = [iface for iface in interfaces if iface != 'lo']
+    return available_interfaces
+
+# Fonction pour demander à l'utilisateur de choisir une interface
+def choose_interface(interfaces):
+    print("Interfaces réseau disponibles :")
+    for i, iface in enumerate(interfaces, 1):
+        print(f"{i}. {iface}")
+    choice = int(input("Choisissez une interface (numéro) : ")) - 1
+    return interfaces[choice]
 
 # Charger la configuration YAML
 with open('config.yaml', 'r') as config_file:
@@ -21,8 +36,19 @@ properties = {
     'port': modules['port'],                  # Port de transfert
     'bitrate': modules['bitrate'],            # Débit en Mbps
     'ip': config['dyode_in']['ip'],           # IP de dyode_in pour l'envoi
-    'interface': config['dyode_out']['interface']  # Interface réseau pour l'envoi
 }
+
+# Vérifier si une interface est définie dans config.yaml, sinon en demander une
+if 'interface' not in config['dyode_out']:
+    available_interfaces = get_available_interfaces()
+    if not available_interfaces:
+        log.error("Aucune interface réseau disponible.")
+        exit(1)
+    chosen_interface = choose_interface(available_interfaces)
+    properties['interface'] = chosen_interface
+    log.info(f"Interface choisie : {chosen_interface}")
+else:
+    properties['interface'] = config['dyode_out']['interface']
 
 def list_all_files(directory):
     files = []

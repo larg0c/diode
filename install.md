@@ -18,11 +18,11 @@ Ce guide d'installation explique comment configurer l'environnement et installer
 
 2. Installez les dépendances Python nécessaires :
     ```bash
-    pip install pyyaml pyinotify pymodbus configparser
+    pip install pyyaml pyinotify pymodbus configparser netifaces
     ```
 3. Installez les dépendances systèmes nécessaires :
    ```bash
-   sudo apt update && sudo apt install net-tools && apt install ufw
+   sudo apt update && sudo apt install net-tools && apt install ufw -y
    sudo ufw allow 9000/udp
    ```
 
