@@ -42,7 +42,7 @@ def choose_interface(interfaces):
     print("Interfaces réseau disponibles :")
     for i, iface in enumerate(interfaces, 1):
         print(f"{i}. {iface}")
-    choice = int(input("Choisissez une interface (numéro) : ")) - 1
+    choice = int(input(f"Choisissez une interface (numéro) [{properties['interfaces']}]: ")) - 1
     return interfaces[choice]
 
 # Charger la configuration YAML et vérifier les paramètres
@@ -88,11 +88,11 @@ def confirm_or_edit_properties(properties):
         # Permettre à l'utilisateur de modifier chaque champ
         properties['ip'] = input(f"Entrez l'IP du destinataire [{properties['ip']}]: ").strip() or properties['ip']
         properties['port'] = int(input(f"Entrez le port [{properties['port']}]: ").strip() or properties['port'])
-        properties['folder'] = int(input(f"Entrez le chemin du dossier [{properties['folder']}]: ").strip() or properties['folder'])
+        properties['folder'] = input(f"Entrez le chemin du dossier [{properties['folder']}]: ").strip() or properties['folder']
         
         # Re-demander l'interface réseau
         available_interfaces = get_available_interfaces()
-        properties['interface'] = choose_interface(available_interfaces)
+        properties['interface'] = choose_interface(available_interfaces) or properties['interface']
         return confirm_or_edit_properties(properties)
     else:
         print("Choix non valide. Veuillez réessayer.")

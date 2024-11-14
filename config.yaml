@@ -11,13 +11,12 @@ dyode_in:
 dyode_out:
   ip: "192.168.1.86"  # IP de l'ordinateur de sortie
   mac: "BC:24:11:26:2C:D3"
-  interface: "fgeth0"
 
 # Modules de transfert de fichiers via UDP
 modules:
   file_transfer:
     type: "folder"
-    in: "/home/analyste/in/"  # Répertoire d'entrée pour les fichiers à transférer
-    out: "/home/analyste/out/"  # Répertoire de destination des fichiers
+    out: "/home/analyste/out/"  # Répertoire d'entrée pour les fichiers à transférer
+    in: "/home/analyste/in/"  # Répertoire de destination des fichiers
     port: 9000  # Port UDP pour le transfert de fichiers
     bitrate: 10  # Débit maximal en Mbps pour le transfert
