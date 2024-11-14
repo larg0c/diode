@@ -3,14 +3,14 @@ config_version: 1.0
 config_date: "2024-11-13"
 
 # Paramètres pour la communication entre les ordinateurs
+dyode_out:
+  ip: "192.168.1.86"  # IP de l'ordinateur de sortie
+  mac: "BC:24:11:26:2C:D3"
+
 dyode_in:
   ip: "192.168.1.182"  # IP de l'ordinateur d'entrée
   mac: "b8:27:eb:b1:ff:ab"
   interface: "eth0"
-
-dyode_out:
-  ip: "192.168.1.86"  # IP de l'ordinateur de sortie
-  mac: "BC:24:11:26:2C:D3"
 
 # Modules de transfert de fichiers via UDP
 modules:

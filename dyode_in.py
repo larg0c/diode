@@ -57,23 +57,31 @@ def load_config():
 
     modules = config['modules']['file_transfer']
     properties = {
-        'folder': modules['in'],                   # Dossier pour enregistrer les fichiers reçus
-        'port': modules['port'],                 # Port de transfert
-        'ip': config['dyode_out']['ip'],         # IP de dyode_out pour réception
+        'folder': modules['in'],
+        'port': modules['port'],
+        'ip': config['dyode_out']['ip']
     }
 
     # Vérifier si une interface est définie dans config.yaml, sinon en demander une
+    available_interfaces = get_available_interfaces()
     if 'interface' not in config['dyode_in']:
-        available_interfaces = get_available_interfaces()
-        if not available_interfaces:
-            log.error("Aucune interface réseau disponible.")
-            exit(1)
         chosen_interface = choose_interface(available_interfaces)
         properties['interface'] = chosen_interface
         log.info(f"Interface choisie : {chosen_interface}")
     else:
         properties['interface'] = config['dyode_in']['interface']
-    
+        # Valider l'interface spécifiée
+        if properties['interface'] not in available_interfaces:
+            print(f"L'interface spécifiée '{properties['interface']}' n'est pas trouvée.")
+            print("Interfaces réseau disponibles :")
+            for i, iface in enumerate(available_interfaces, 1):
+                print(f"{i}. {iface}")
+            choice = input("Voulez-vous changer l'interface ? (y/n) : ").strip().lower()
+            if choice == 'y':
+                properties['interface'] = choose_interface(available_interfaces)
+            else:
+                print("Utilisation de l'interface par défaut ou tentative de continuer sans changement.")
+
     return properties
 
 
