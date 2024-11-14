@@ -59,7 +59,7 @@ def wait_for_file(params):
     log.debug(datetime.datetime.now())
     process_name = multiprocessing.current_process().name
     manifest_filename = 'manifest_' + process_name + '.cfg'
-    receive_file(manifest_filename, params['port'], params['dyode_in']['ip'])  # Ajoutez ici l'IP du YAML
+    receive_file(manifest_filename, params['port'], params['ip'])  # Utiliser params['ip']
     files = parse_manifest(manifest_filename)
     if len(files) == 0:
         log.error('Aucun fichier détecté')
