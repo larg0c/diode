@@ -1,9 +1,9 @@
 import os
+import time
 import yaml
 import dyode
 import logging
 import netifaces
-from configparser import ConfigParser
 
 # Configuration du logging
 logging.basicConfig()
@@ -24,36 +24,73 @@ def choose_interface(interfaces):
     choice = int(input("Choisissez une interface (numéro) : ")) - 1
     return interfaces[choice]
 
-# Charger la configuration YAML
-with open('config.yaml', 'r') as config_file:
-    config = yaml.safe_load(config_file)
+# Charger la configuration YAML et vérifier les paramètres
+def load_config():
+    with open('config.yaml', 'r') as config_file:
+        config = yaml.safe_load(config_file)
 
-# Extraire les informations de configuration pour dyode_in
-modules = config['modules']['file_transfer']
-properties = {
-    'in': modules['in'],                   # Dossier pour enregistrer les fichiers reçus
-    'port': modules['port'],                  # Port de transfert
-    'ip': config['dyode_out']['ip'],          # IP de dyode_out pour réception
-}
+    modules = config['modules']['file_transfer']
+    properties = {
+        'in': modules['in'],                   # Dossier pour enregistrer les fichiers reçus
+        'port': modules['port'],                 # Port de transfert
+        'ip': config['dyode_out']['ip'],         # IP de dyode_out pour réception
+    }
 
-# Vérifier si une interface est définie dans config.yaml, sinon en demander une
-if 'interface' not in config['dyode_in']:
-    available_interfaces = get_available_interfaces()
-    if not available_interfaces:
-        log.error("Aucune interface réseau disponible.")
-        exit(1)
-    chosen_interface = choose_interface(available_interfaces)
-    properties['interface'] = chosen_interface
-    log.info(f"Interface choisie : {chosen_interface}")
-else:
-    properties['interface'] = config['dyode_in']['interface']
+    # Vérifier si une interface est définie dans config.yaml, sinon en demander une
+    if 'interface' not in config['dyode_in']:
+        available_interfaces = get_available_interfaces()
+        if not available_interfaces:
+            log.error("Aucune interface réseau disponible.")
+            exit(1)
+        chosen_interface = choose_interface(available_interfaces)
+        properties['interface'] = chosen_interface
+        log.info(f"Interface choisie : {chosen_interface}")
+    else:
+        properties['interface'] = config['dyode_in']['interface']
+    
+    return properties
 
+# Fonction pour une saisie avec temporisation
+def input_with_timeout(prompt, timeout=10):
+    timer = Timer(timeout, lambda: sys.stdin.write('\n'))
+    timer.start()
+    try:
+        return input(prompt)
+    finally:
+        timer.cancel()
 
+# Fonction pour vérifier la configuration avec l'utilisateur
+def confirm_or_edit_properties(properties):
+    print("\nConfiguration actuelle :")
+    print(f"IP de l'émetteur : {properties['ip']}")
+    print(f"Port : {properties['port']}")
+    print(f"Interface : {properties['interface']}")
+    print(f"Dossier de réception : {properties['out']}")
+    
+    # Utilisation de input_with_timeout pour que le script continue après 10 secondes avec "y" par défaut
+    choice = input_with_timeout("Est-ce correct ? (y/n) : ").strip().lower()
+    if choice == 'y' or choice == '':
+        print("Démarrage dans 10 secondes...")
+        time.sleep(10)
+        return properties
+    elif choice == 'n':
+        # Permettre à l'utilisateur de modifier chaque champ
+        properties['ip'] = input(f"Entrez l'IP de l'émetteur [{properties['ip']}]: ").strip() or properties['ip']
+        properties['port'] = int(input(f"Entrez le port [{properties['port']}]: ").strip() or properties['port'])
+        
+        # Re-demander l'interface réseau
+        available_interfaces = get_available_interfaces()
+        properties['interface'] = choose_interface(available_interfaces)
+        return properties
+    else:
+        print("Choix non valide. Veuillez réessayer.")
+        return confirm_or_edit_properties(properties)
+
+# Fonction principale pour recevoir les fichiers
 def wait_for_file(params):
     manifest_filename = 'manifest.cfg'
     dyode.receive_file(manifest_filename, params['port'], params['ip'], params['interface'])
 
-    # Vérifier le contenu du fichier manifeste après réception
     if os.path.exists(manifest_filename):
         with open(manifest_filename, 'r') as manifest_file:
             log.debug(f"Contenu du fichier manifeste reçu :\n{manifest_file.read()}")
@@ -74,6 +111,10 @@ def wait_for_file(params):
             log.info(f"Fichier {temp_file} reçu avec succès.")
 
 if __name__ == '__main__':
+    # Charger et confirmer les paramètres
+    properties = load_config()
+    properties = confirm_or_edit_properties(properties)
+    
     # Boucle d'attente pour les fichiers
     while True:
         wait_for_file(properties)
