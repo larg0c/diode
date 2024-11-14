@@ -49,7 +49,7 @@ def load_config():
 
     modules = config['modules']['file_transfer']
     properties = {
-        'in': modules['in'],                   # Dossier pour enregistrer les fichiers reçus
+        'folder': modules['in'],                   # Dossier pour enregistrer les fichiers reçus
         'port': modules['port'],                 # Port de transfert
         'ip': config['dyode_out']['ip'],         # IP de dyode_out pour réception
     }
@@ -75,7 +75,7 @@ def confirm_or_edit_properties(properties):
     print(f"IP de l'émetteur : {properties['ip']}")
     print(f"Port : {properties['port']}")
     print(f"Interface : {properties['interface']}")
-    print(f"Dossier de réception : {properties['out']}")
+    print(f"Dossier de réception : {properties['folder']}")
     
     # Utilisation de input_with_timeout pour que le script continue après 10 secondes avec "y" par défaut
     choice = input_with_timeout("Est-ce correct ? (y/n) : ").strip().lower()
@@ -85,6 +85,7 @@ def confirm_or_edit_properties(properties):
         # Permettre à l'utilisateur de modifier chaque champ
         properties['ip'] = input(f"Entrez l'IP de l'émetteur [{properties['ip']}]: ").strip() or properties['ip']
         properties['port'] = int(input(f"Entrez le port [{properties['port']}]: ").strip() or properties['port'])
+        properties['folder'] = int(input(f"Entrez le chemin du dossier [{properties['folder']}]: ").strip() or properties['folder'])
         
         # Re-demander l'interface réseau
         available_interfaces = get_available_interfaces()
@@ -109,7 +110,7 @@ def wait_for_file(params):
         return
     
     for f, expected_hash in files.items():
-        temp_file = os.path.join(params['in'], os.path.basename(f))
+        temp_file = os.path.join(params['folder'], os.path.basename(f))
         dyode.receive_file(temp_file, params['port'], params['ip'], params['interface'])
 
         if dyode.hash_file(temp_file) != expected_hash:

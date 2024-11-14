@@ -52,7 +52,7 @@ def load_config():
 
     modules = config['modules']['file_transfer']
     properties = {
-        'out': modules['out'],                    # Dossier surveillé pour envoi
+        'folder': modules['out'],                    # Dossier surveillé pour envoi
         'port': modules['port'],                  # Port de transfert
         'bitrate': modules['bitrate'],            # Débit en Mbps
         'ip': config['dyode_in']['ip'],           # IP de dyode_in pour l'envoi
@@ -78,7 +78,7 @@ def confirm_or_edit_properties(properties):
     print(f"IP du destinataire : {properties['ip']}")
     print(f"Port : {properties['port']}")
     print(f"Interface : {properties['interface']}")
-    print(f"Dossier d'envoi : {properties['out']}")
+    print(f"Dossier d'envoi : {properties['folder']}")
     print(f"Débit (Mbps) : {properties['bitrate']}")
     
     choice = input_with_timeout("Est-ce correct ? (y/n) : ").strip().lower()
@@ -88,6 +88,7 @@ def confirm_or_edit_properties(properties):
         # Permettre à l'utilisateur de modifier chaque champ
         properties['ip'] = input(f"Entrez l'IP du destinataire [{properties['ip']}]: ").strip() or properties['ip']
         properties['port'] = int(input(f"Entrez le port [{properties['port']}]: ").strip() or properties['port'])
+        properties['folder'] = int(input(f"Entrez le chemin du dossier [{properties['folder']}]: ").strip() or properties['folder'])
         
         # Re-demander l'interface réseau
         available_interfaces = get_available_interfaces()
@@ -108,7 +109,7 @@ def list_all_files(directory):
     return files
 
 def file_copy(params):
-    files = list_all_files(params['out'])
+    files = list_all_files(params['folder'])
     log.debug(f"Fichiers détectés pour l'envoi : {files}")  # Log pour afficher les fichiers détectés
     if not files:
         log.debug("Aucun fichier détecté pour l'envoi.")
